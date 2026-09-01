@@ -214,7 +214,10 @@ input[type=checkbox]{width:auto}
 /* ── TRACKER UI ── */
 .warn-bar{background:var(--amber2);border:1px solid var(--amber);border-radius:var(--rsm);padding:0.4rem 0.75rem;font-size:0.8rem;color:var(--amber);margin-bottom:0.55rem;display:none}
 .warn-bar.on{display:block}
-.action-row{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem}
+.action-row{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.6rem}
+.flt-inline{display:flex;align-items:center;gap:0.3rem;flex-shrink:0}
+.flt-auto{width:auto;padding:3px 6px;font-size:0.72rem}
+.mob-strip{display:none} /* hidden on desktop, shown on mobile via media query */
 .add-trig{display:inline-flex;align-items:center;gap:0.45rem;padding:0.5rem 1.1rem;background:var(--accent);border:none;border-radius:var(--rsm);cursor:pointer;color:#fff;font-size:0.85rem;font-family:var(--font);font-weight:500;transition:all var(--tr);width:auto;flex-shrink:0}
 .add-trig:hover{opacity:.88;transform:translateY(-1px)}
 .sec-lbl{font-size:0.72rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
@@ -364,7 +367,7 @@ canvas{display:block;width:100%!important}
   .tracker.blurred{filter:none;opacity:1;pointer-events:auto}
   .backdrop{display:none!important}
 
-  .mob-strip{display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;font-size:0.72rem;font-family:var(--mono);color:var(--text2)}
+  .mob-strip{display:flex;align-items:center;gap:0.3rem;font-size:0.7rem;font-family:var(--mono);color:var(--text2);flex:1;min-width:0;white-space:nowrap;overflow:hidden;padding:0;background:none;border:none}
   .mob-strip span{color:var(--text);font-weight:600}
 
   /* BOTTOM SHEET — correct height chain */
@@ -440,10 +443,14 @@ canvas{display:block;width:100%!important}
 
   .rep-grid{grid-template-columns:1fr 1fr}
   .ins-grid{grid-template-columns:1fr 1fr}
-  .flt{min-height:32px;padding:4px 10px}
-  .action-row{flex-wrap:nowrap;gap:0.4rem;margin-bottom:0.6rem}
-  .add-trig{padding:0.45rem 0.85rem;font-size:0.8rem;flex:0 0 auto}
-  .ms-btn{padding:0.45rem 0.75rem;font-size:0.78rem;flex:0 0 auto}
+  .flt{min-height:28px;padding:3px 8px;font-size:0.7rem}
+  .flt-auto{min-height:26px;padding:2px 5px;font-size:0.68rem}
+  .action-row{flex-wrap:nowrap;gap:0.4rem;margin-bottom:0.45rem;align-items:center}
+  .add-trig{padding:0.42rem 0.85rem;font-size:0.8rem;flex:0 0 auto}
+  .ms-btn{padding:0.42rem 0.65rem;font-size:0.75rem;flex:0 0 auto;gap:0.2rem}
+  .mob-strip{display:flex;align-items:center;gap:0.3rem;font-size:0.7rem;font-family:var(--mono);color:var(--text2);padding:0.3rem 0;margin-bottom:0.2rem}
+  .mob-strip span{color:var(--text);font-weight:600}
+  #mobStrip{display:flex}
 }
 @media(min-width:1280px){
   :root{--sb:200px}
@@ -502,21 +509,30 @@ canvas{display:block;width:100%!important}
       ✅&nbsp;<span id="mobTasks">0/0</span>
     </div>
     <div class="warn-bar" id="warnBar">⚡ Heavy day — 3+ high priority tasks pending. Consider rescheduling one.</div>
-    <!-- Action row: Add goal left, Morning Summary right -->
+    <!-- Stats strip — mobile only, hidden on desktop -->
+    <div class="mob-strip" id="mobStrip">
+      <span>XP</span>&nbsp;<span id="mobXP">0/0</span>
+      &nbsp;·&nbsp; 🔥&nbsp;<span id="mobStreak">0d</span>
+      &nbsp;·&nbsp; ✅&nbsp;<span id="mobTasks">0/0</span>
+    </div>
+    <!-- Action row -->
     <div class="action-row">
       <button class="add-trig" onclick="openModal()">
         <span style="font-size:1.2rem;line-height:1;font-weight:300">+</span> Add goal
       </button>
       <button class="ms-btn" onclick="openMS()">☀ Morning Summary</button>
     </div>
+    <!-- Today's Goals label + inline auto-width dropdowns -->
     <div class="sec-hd">
       <span class="sec-lbl">Today's Goals</span>
-      <div style="display:flex;gap:0.3rem;flex-wrap:wrap">
-        <select id="fltSt" class="flt" style="padding:3px 6px;font-size:0.72rem" onchange="renderTasks()">
-          <option value="all">All</option><option value="pending">Pending</option>
-          <option value="done">Done</option><option value="missed">Missed</option>
+      <div class="flt-inline">
+        <select id="fltSt" class="flt flt-auto" onchange="renderTasks()">
+          <option value="all">All</option>
+          <option value="pending">Pending</option>
+          <option value="done">Done</option>
+          <option value="missed">Missed</option>
         </select>
-        <select id="fltCat" class="flt" style="padding:3px 6px;font-size:0.72rem" onchange="renderTasks()">
+        <select id="fltCat" class="flt flt-auto" onchange="renderTasks()">
           <option value="all">All Categories</option>
         </select>
       </div>
