@@ -7,7 +7,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f1117">
-<title>Personal Goal Tracker</title>
+<link rel="manifest" href="./manifest.json">
+<title>Personal Goal Tracker — You are your life coach</title>
 <style>
 /* ── TOKENS ── */
 :root{
@@ -351,10 +352,9 @@ canvas{display:block;width:100%!important}
   .app{grid-template-rows:50px 1fr;height:100%;height:100dvh}
 
   .hdr{padding:0 0.75rem;gap:0.4rem}
-  .brand-name span{display:none}
-  .brand-name{font-size:0.85rem}
-  .hdr-clock{position:absolute;left:50%;transform:translateX(-50%)}
-  .hdr-clock-time{font-size:0.85rem}
+  .brand-name{display:none} /* hide text entirely on mobile — DT mark stays */
+  .hdr-clock{position:absolute;left:50%;transform:translateX(-50%);pointer-events:none}
+  .hdr-clock-time{font-size:0.9rem;letter-spacing:.06em}
   .hdr-clock-date{display:none}
   .hdr-xp{display:none}
 
@@ -466,8 +466,8 @@ canvas{display:block;width:100%!important}
 <!-- HEADER -->
 <header class="hdr">
   <div class="brand">
-    <div class="brand-mark">DT</div>
-    <span class="brand-name">Personal Goal Tracker <span style="font-weight:400;color:var(--text2);font-size:0.78rem;letter-spacing:0">— Achieve your goals, one day at a time</span></span>
+    <div class="brand-mark">GT</div>
+    <span class="brand-name">Personal Goal Tracker <span style="font-weight:400;color:var(--text2);font-size:0.78rem;letter-spacing:0">— You are your life coach</span></span>
   </div>
   <div class="hdr-gap"></div>
   <div class="hdr-clock">
@@ -643,6 +643,20 @@ canvas{display:block;width:100%!important}
   </div>
 </div>
 
+<!-- Install banner (shown when PWA installable) -->
+<div id="installBanner" style="display:none;position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:0.65rem 1rem;display:none;align-items:center;gap:0.75rem;z-index:990;box-shadow:0 4px 24px rgba(0,0,0,.3);font-size:0.82rem;white-space:nowrap">
+  <span>📲 Install Personal Goal Tracker as an app</span>
+  <button class="btn btn-sm btn-p" onclick="window._triggerInstall()">Install</button>
+  <button class="btn btn-sm btn-g" onclick="this.parentElement.style.display='none'">✕</button>
+</div>
+
+<!-- Update banner (shown when new SW waiting) -->
+<div id="updateBanner" style="display:none;position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:0.65rem 1rem;align-items:center;gap:0.75rem;z-index:990;box-shadow:0 4px 24px rgba(0,0,0,.3);font-size:0.82rem;white-space:nowrap">
+  <span>🔄 Update available</span>
+  <button class="btn btn-sm btn-p" onclick="applyUpdate()">Reload</button>
+  <button class="btn btn-sm btn-g" onclick="this.parentElement.style.display='none'">Later</button>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- Timer Complete Overlay -->
@@ -697,6 +711,16 @@ function load(){try{const r=localStorage.getItem('dayops_v6');if(r)Object.assign
 // THEME
 // ═══════════════════════════════════════════
 function toggleTheme(){S.theme=S.theme==='dark'?'light':'dark';applyTheme();save();setTimeout(rebuildCharts,150);}
+function showUpdateBanner(){
+  const b=document.getElementById('updateBanner');
+  if(b)b.style.display='flex';
+}
+function applyUpdate(){
+  navigator.serviceWorker.getRegistration().then(function(reg){
+    if(reg&&reg.waiting){reg.waiting.postMessage({type:'SKIP_WAITING'});}
+  });
+  window.location.reload();
+}
 function applyTheme(){document.documentElement.setAttribute('data-theme',S.theme);document.getElementById('thIcon').textContent=S.theme==='dark'?'☀️':'🌙';}
 
 // ═══════════════════════════════════════════
@@ -1723,6 +1747,44 @@ document.addEventListener('keydown',e=>{
 // INIT
 // ═══════════════════════════════════════════
 function init(){
+  // ── Service Worker registration ──
+  if('serviceWorker' in navigator){
+    // Skip SW registration in sandboxed preview environments
+    const host=window.location.hostname;
+    const isSandbox=host.includes('claudeusercontent') || host.includes('localhost') === false && host.includes('127.0.0.1') === false && !host.includes('github.io') && !host.includes('netlify') && !host.includes('vercel') && !host.includes('pages.dev') && window.location.protocol!=='http:';
+    const isLocal=host==='localhost'||host==='127.0.0.1';
+    if(!host.includes('claudeusercontent') && (isLocal || host.includes('github.io') || host.includes('netlify') || host.includes('vercel') || host.includes('pages.dev') || window.location.protocol==='https:')){
+      navigator.serviceWorker.register('./sw.js').then(function(reg){
+      // When a new SW is waiting, prompt user to update
+      if(reg.waiting){showUpdateBanner();}
+      reg.addEventListener('updatefound',function(){
+        const nw=reg.installing;
+        nw.addEventListener('statechange',function(){
+          if(nw.state==='installed'&&navigator.serviceWorker.controller){
+            showUpdateBanner();
+          }
+        });
+      });
+    }).catch(function(e){console.warn('SW registration failed:',e);});
+    } // end sandbox guard
+  }
+
+  // ── PWA install prompt ──
+  let deferredPrompt=null;
+  window.addEventListener('beforeinstallprompt',function(e){
+    e.preventDefault();deferredPrompt=e;
+    const banner=document.getElementById('installBanner');
+    if(banner)banner.style.display='flex';
+  });
+  window.addEventListener('appinstalled',function(){
+    const banner=document.getElementById('installBanner');
+    if(banner)banner.style.display='none';
+    deferredPrompt=null;
+  });
+  window._triggerInstall=function(){
+    if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(function(){deferredPrompt=null;});}
+  };
+
   // Preload speech synthesis voices (async on Chrome/Android)
   if('speechSynthesis' in window){
     window.speechSynthesis.getVoices();
