@@ -500,16 +500,8 @@ canvas{display:block;width:100%!important}
 
   <!-- TASK TRACKER -->
   <div class="tracker" id="tracker">
-    <!-- Mobile stats strip — hidden on desktop via CSS -->
-    <div class="mob-strip" id="mobStrip" style="display:none">
-      <span>XP</span>&nbsp;<span id="mobXP">0/0</span>
-      &nbsp;·&nbsp;
-      🔥&nbsp;<span id="mobStreak">0d</span>
-      &nbsp;·&nbsp;
-      ✅&nbsp;<span id="mobTasks">0/0</span>
-    </div>
     <div class="warn-bar" id="warnBar">⚡ Heavy day — 3+ high priority tasks pending. Consider rescheduling one.</div>
-    <!-- Stats strip — mobile only, hidden on desktop -->
+    <!-- Stats strip — mobile only -->
     <div class="mob-strip" id="mobStrip">
       <span>XP</span>&nbsp;<span id="mobXP">0/0</span>
       &nbsp;·&nbsp; 🔥&nbsp;<span id="mobStreak">0d</span>
@@ -520,7 +512,7 @@ canvas{display:block;width:100%!important}
       <button class="add-trig" onclick="openModal()">
         <span style="font-size:1.2rem;line-height:1;font-weight:300">+</span> Add goal
       </button>
-      <button class="ms-btn" onclick="openMS()">☀ Morning Summary</button>
+      <button class="ms-btn" onclick="openMS()">☀ Summary</button>
     </div>
     <!-- Today's Goals label + inline auto-width dropdowns -->
     <div class="sec-hd">
