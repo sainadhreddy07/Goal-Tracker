@@ -1404,7 +1404,7 @@ function renderTasks(){
 
   const el=document.getElementById('taskList');
   if(!tasks.length){
-    el.innerHTML=`<div style="text-align:center;padding:2rem 1rem;color:var(--text3);font-size:0.85rem">No missions match filter.<br>Add one above ↑</div>`;
+    el.innerHTML=`<div style="text-align:center;padding:2rem 1rem;color:var(--text3);font-size:0.85rem">No missions available.<br>Click '+ Add goal' to start adding</div>`;
   }else{
     const ptag={High:'tg-h',Medium:'tg-m',Low:'tg-l'};
     el.innerHTML=tasks.map(t=>{
