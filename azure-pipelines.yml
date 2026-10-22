@@ -7,19 +7,22 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
--script: dotnet build-configuration $(buildConfiguration)
-displayName: 'dotnet build $(buildConfiguration)"
+  - script: dotnet build --configuration $(buildConfiguration)
+    displayName: 'dotnet build $(buildConfiguration)'
 
-- task: DotNetCoreCLI@2
-  inputs:
-#    azureSubscription: 'dot-NET-app-SN' #your-authorized-service-connection
-    command: 'publish'
-    publishWebProjects: true
+  - task: DotNetCoreCLI@2
+    displayName: 'Publish .NET application'
+    inputs:
+      command: 'publish'
+      publishWebProjects: true
+      arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+      zipAfterPublish: true
 
-- task: AzureWebApp@1
-  inputs:
-    azureSubscription: 'dot-NET-app-SN' #your-authorized-service-connection
-    appType: 'webApp'
-    appName: '<chinta-dotNET-APP>'
-    package: '$(System.DefaultWorkingDirectory)/**/*.zip'
-    deploymentMethod: 'auto'
+  - task: AzureWebApp@1
+    displayName: 'Deploy to Azure Web App'
+    inputs:
+      azureSubscription: 'dot-NET-app-SN'
+      appType: 'webApp'
+      appName: '<chinta-dotNET-APP>'
+      package: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+      deploymentMethod: 'auto'
