@@ -1,7 +1,4 @@
-# HTML
-# Archive your static HTML project and save it with the build record.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+# NEW VERSION FROM MS Docs
 
 trigger:
 - main
@@ -10,8 +7,16 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- task: ArchiveFiles@2
+- task: DotNetCoreCLI@2
   inputs:
-    rootFolderOrFile: '$(build.sourcesDirectory)'
-    includeRootFolder: false
-- task: PublishBuildArtifacts@1
+    azureSubscription: 'dot-NET-app-SN' #your-authorized-service-connection
+    command: 'publish'
+    publishWebProjects: true
+
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: 'dot-NET-app-SN' #your-authorized-service-connection
+    appType: 'webApp'
+    appName: '<chinta-dotNET-APP>'
+    package: '$(System.DefaultWorkingDirectory)/**/*.zip'
+    deploymentMethod: 'auto'
